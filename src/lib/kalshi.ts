@@ -63,7 +63,7 @@ export async function fetchKalshiEvents(): Promise<NormalizedEvent[]> {
 
   try {
     const res = await fetch(
-      `${KALSHI_BASE}/events?with_nested_markets=true&limit=200`,
+      `${KALSHI_BASE}/events?with_nested_markets=true&limit=500`,
       { cache: "no-store" }
     );
 

@@ -91,7 +91,7 @@ export async function fetchPolymarketEvents(): Promise<NormalizedEvent[]> {
 
   try {
     const res = await fetch(
-      `${GAMMA_BASE}/events?active=true&closed=false&limit=100`,
+      `${GAMMA_BASE}/events?active=true&closed=false&limit=200`,
       { cache: "no-store" }
     );
 

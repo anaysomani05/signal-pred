@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { NormalizedEvent, MarketOption } from "@/lib/types";
 import { formatVolume, formatPriceChange } from "@/lib/utils";
+import { markSeen } from "@/lib/seen-markets";
 import { ArrowUpRight, ArrowDownRight, ChevronDown, ArrowUpRight as TradeIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -67,6 +68,7 @@ function OptionRow({
 }
 
 export function MarketCard({ event }: { event: NormalizedEvent; index: number }) {
+  const cardRef = useRef<HTMLDivElement>(null);
   const timeAgo = event.endDate
     ? formatDistanceToNow(new Date(event.endDate), { addSuffix: false })
     : null;
@@ -75,6 +77,23 @@ export function MarketCard({ event }: { event: NormalizedEvent; index: number })
   const optionsRef = useRef<HTMLDivElement>(null);
   const [showAll, setShowAll] = useState(false);
 
+  // Mark market as seen when it scrolls into view
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          markSeen([event.id]);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [event.id]);
+
   const INITIAL = 5;
   const hasMore = event.options.length > INITIAL;
   const visible = showAll || !hasMore ? event.options : event.options.slice(0, INITIAL);
@@ -82,7 +101,7 @@ export function MarketCard({ event }: { event: NormalizedEvent; index: number })
   const isKalshi = event.source === "kalshi";
 
   return (
-    <div className="h-[100dvh] w-full snap-start snap-always flex items-center justify-center px-4">
+    <div ref={cardRef} className="h-[100dvh] w-full snap-start snap-always flex items-center justify-center px-4">
       <div className="card-surface w-full max-w-lg flex flex-col overflow-hidden card-enter" style={{ maxHeight: "calc(100dvh - 100px)" }}>
 
         {/* Header */}
